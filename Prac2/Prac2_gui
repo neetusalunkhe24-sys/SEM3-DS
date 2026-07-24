@@ -1,0 +1,120 @@
+import tkinter as tk
+from tkinter import messagebox
+
+class Stack:
+    def __init__(self):
+        self.items = []
+
+    def insert(self, item, position):
+        if position < 0 or position > len(self.items):
+            raise IndexError("Invalid Position")
+        self.items.insert(position, item)
+
+    def delete(self, position):
+        if position < 0 or position >= len(self.items):
+            raise IndexError("Invalid Position")
+        return self.items.pop(position)
+
+    def peek(self):
+        if not self.items:
+            raise IndexError("Stack is Empty")
+        return self.items[-1]
+
+    def is_empty(self):
+        return len(self.items) == 0
+
+    def size(self):
+        return len(self.items)
+
+    def traverse(self):
+        if not self.items:
+            return "Stack is Empty"
+        return " <- ".join(self.items)
+
+    def display(self):
+        if not self.items:
+            return "Stack is Empty"
+        return "\n".join(reversed(self.items))
+    
+stack = Stack()
+
+def update_display():
+    stack_display.delete(0, tk.END)
+
+    if stack.items:
+        for item in reversed(stack.items):
+            stack_display.insert(tk.END, item)
+    else:
+        stack_display.insert(tk.END, "Stack is Empty")
+
+def insert_item():
+    item = entry_item.get()
+    pos = entry_position.get()
+    if item == "" or pos == "":
+        messagebox.showerror("Error", "Enter Item and Position")
+        return
+    try:
+        stack.insert(item, int(pos))
+        messagebox.showinfo("Success", f"'{item}' inserted successfully.")
+        update_display()
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+
+def delete_item():
+    pos = entry_position.get()
+    if pos == "":
+        messagebox.showerror("Error", "Enter Position")
+        return
+    try:
+        item = stack.delete(int(pos))
+        messagebox.showinfo("Deleted", f"'{item}' deleted successfully.")
+        update_display()
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+
+def peek_item():
+    try:
+        messagebox.showinfo("Peek", f"Top Item: {stack.peek()}")
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+
+def check_empty():
+    if stack.is_empty():
+        messagebox.showinfo("Stack", "Stack is Empty")
+    else:
+        messagebox.showinfo("Stack", "Stack is NOT Empty")
+
+def stack_size():
+    messagebox.showinfo("Size", f"Stack Size: {stack.size()}")
+
+def traverse_stack():
+    messagebox.showinfo("Traverse", stack.traverse())
+
+root = tk.Tk()
+root.title("Stack Operations Using GUI")
+root.geometry("800x480")
+root.configure(bg="#ECEFF4")
+title = tk.Label(root, text="STACK MANAGER", font=("Georgia", 20, "bold"), bg="#ECEFF4", fg="#0B2545")
+title.pack(pady=10)
+left_frame = tk.Frame(root, bg="#ECEFF4")
+left_frame.pack(side="left", padx=30, pady=20)
+
+right_frame = tk.Frame(root, bg="#ECEFF4")
+right_frame.pack(side="right", padx=30, pady=20)
+
+tk.Label(left_frame, text="Enter Item:", bg="#ECEFF4", font=("Calibri", 12)).pack()
+entry_item = tk.Entry(left_frame, font=("Calibri", 12))
+entry_item.pack(pady=5)
+tk.Label(root, text="Enter Position:", bg="#ECEFF4", font=("Calibri", 12)).pack()
+entry_position = tk.Entry(root, font=("Calibri", 12))
+entry_position.pack(pady=5)
+tk.Button(left_frame, text="Insert", width=18, bg="RoyalBlue", fg="white", font=("Verdana", 10, "bold"), command=insert_item).pack(pady=5)
+tk.Button(left_frame, text="Delete", width=20, bg="Crimson", fg="white", font=("Verdana", 10, "bold"), command=delete_item).pack(pady=5)
+tk.Button(left_frame, text="Peek", width=20, bg="SeaGreen", fg="white", font=("Verdana", 10, "bold"), command=peek_item).pack(pady=5)
+tk.Button(left_frame, text="Is Empty?", width=20, bg="DarkOrange", fg="white", font=("Verdana", 10, "bold"), command=check_empty).pack(pady=5)
+tk.Button(left_frame, text="Size", width=20, bg="Purple", fg="white", font=("Verdana", 10, "bold"), command=stack_size).pack(pady=5)
+tk.Button(left_frame, text="Traverse", width=20, bg="SlateGray", fg="white", font=("Verdana", 10, "bold"), command=traverse_stack).pack(pady=5)
+tk.Label(right_frame, text="Current Stack", bg="#ECEFF4", font=("Georgia", 14, "bold")).pack()
+stack_display = tk.Listbox(right_frame, width=25, height=12, font=("Consolas", 12), bg="white", fg="navy")
+stack_display.pack(pady=10)
+root.mainloop()
