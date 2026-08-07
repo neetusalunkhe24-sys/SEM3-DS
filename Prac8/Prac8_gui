@@ -1,0 +1,194 @@
+import tkinter as tk
+from tkinter import scrolledtext
+import heapq
+
+# ---------------- AVL Tree ---------------- #
+
+class AVLNode:
+    def __init__(self, key):
+        self.key = key
+        self.height = 1
+        self.left = None
+        self.right = None
+
+
+class AVLTree:
+
+    def height(self, node):
+        return node.height if node else 0
+
+    def balance(self, node):
+        if not node:
+            return 0
+        return self.height(node.left) - self.height(node.right)
+
+    def right_rotate(self, y):
+        x = y.left
+        t2 = x.right
+
+        x.right = y
+        y.left = t2
+
+        y.height = 1 + max(self.height(y.left), self.height(y.right))
+        x.height = 1 + max(self.height(x.left), self.height(x.right))
+
+        return x
+
+    def left_rotate(self, x):
+        y = x.right
+        t2 = y.left
+
+        y.left = x
+        x.right = t2
+
+        x.height = 1 + max(self.height(x.left), self.height(x.right))
+        y.height = 1 + max(self.height(y.left), self.height(y.right))
+
+        return y
+
+    def insert(self, root, key):
+
+        if not root:
+            return AVLNode(key)
+
+        if key < root.key:
+            root.left = self.insert(root.left, key)
+        else:
+            root.right = self.insert(root.right, key)
+
+        root.height = 1 + max(self.height(root.left),
+                              self.height(root.right))
+
+        b = self.balance(root)
+
+        if b > 1 and key < root.left.key:
+            return self.right_rotate(root)
+
+        if b < -1 and key > root.right.key:
+            return self.left_rotate(root)
+
+        if b > 1 and key > root.left.key:
+            root.left = self.left_rotate(root.left)
+            return self.right_rotate(root)
+
+        if b < -1 and key < root.right.key:
+            root.right = self.right_rotate(root.right)
+            return self.left_rotate(root)
+
+        return root
+
+    def preorder(self, root):
+        if root:
+            return [root.key] + self.preorder(root.left) + self.preorder(root.right)
+        return []
+
+
+# ---------------- Run Program ---------------- #
+
+def run_program():
+
+    output.delete(1.0, tk.END)
+
+    avl_tree = AVLTree()
+    root = None
+
+    avl_values = list(map(int, avl_entry.get().split(",")))
+
+    for value in avl_values:
+        root = avl_tree.insert(root, value)
+
+    preorder = avl_tree.preorder(root)
+
+    heap_values = list(map(int, heap_entry.get().split(",")))
+
+    min_heap = heap_values.copy()
+    heapq.heapify(min_heap)
+
+    max_heap = [-i for i in heap_values]
+    heapq.heapify(max_heap)
+    max_heap = [-i for i in max_heap]
+
+    tasks = []
+
+    heapq.heappush(tasks, (2, "Backup database"))
+    heapq.heappush(tasks, (1, "Handle emergency patient"))
+    heapq.heappush(tasks, (3, "Run diagnostics"))
+
+    output.insert(tk.END, "=========== AVL TREE ===========\n")
+    output.insert(tk.END, "Preorder Traversal\n")
+    output.insert(tk.END, str(preorder))
+
+    output.insert(tk.END, "\n\n=========== HEAPS ===========\n")
+    output.insert(tk.END, "Min Heap : ")
+    output.insert(tk.END, str(min_heap))
+
+    output.insert(tk.END, "\nMax Heap : ")
+    output.insert(tk.END, str(max_heap))
+
+    output.insert(tk.END, "\n\n====== TASK PRIORITY ======\n")
+
+    while tasks:
+        p, task = heapq.heappop(tasks)
+        output.insert(tk.END, f"Priority {p}  -->  {task}\n")
+
+
+# ---------------- GUI ---------------- #
+
+window = tk.Tk()
+window.title("Data Structure Simulator")
+window.geometry("760x600")
+window.configure(bg="#E8F8F5")
+
+title = tk.Label(
+    window,
+    text="AVL Tree | Heap | Priority Queue",
+    bg="#117864",
+    fg="white",
+    font=("Arial", 18, "bold"),
+    pady=10
+)
+
+title.pack(fill="x")
+
+frame = tk.Frame(window, bg="#E8F8F5")
+frame.pack(pady=20)
+
+tk.Label(frame,
+         text="AVL Values (comma separated)",
+         bg="#E8F8F5",
+         font=("Arial", 11, "bold")).grid(row=0, column=0)
+
+avl_entry = tk.Entry(frame, width=40)
+avl_entry.grid(row=1, column=0, padx=10, pady=5)
+avl_entry.insert(0, "20,4,15,70,50,100,80")
+
+tk.Label(frame,
+         text="Heap Values (comma separated)",
+         bg="#E8F8F5",
+         font=("Arial", 11, "bold")).grid(row=2, column=0)
+
+heap_entry = tk.Entry(frame, width=40)
+heap_entry.grid(row=3, column=0, padx=10, pady=5)
+heap_entry.insert(0, "9,5,6,2,3")
+
+run_btn = tk.Button(
+    window,
+    text="Run Simulation",
+    bg="#E67E22",
+    fg="white",
+    font=("Arial", 12, "bold"),
+    command=run_program
+)
+
+run_btn.pack(pady=10)
+
+output = scrolledtext.ScrolledText(
+    window,
+    width=80,
+    height=20,
+    font=("Consolas", 11)
+)
+
+output.pack(padx=15, pady=10)
+
+window.mainloop()
